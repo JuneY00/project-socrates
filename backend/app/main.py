@@ -4,8 +4,16 @@ from fastapi import FastAPI
 from app.schemas import ChatRequest, ChatResponse
 from app.services.nlp_proc import process_text
 from app.services.llm_client import generate_socratic_reply
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI(title="Socrates AI")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
