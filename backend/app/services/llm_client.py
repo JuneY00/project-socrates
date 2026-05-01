@@ -29,15 +29,38 @@ model = genai.GenerativeModel(
 )
 
 # get user input and generate a Socratic reply 
-async def generate_socratic_reply(user_input: str) -> str:
-    try:
-        
-        # 1. Gemini API call to generate a response based on the user input 
-        response = await model.generate_content_async(user_input)
+async def generate_socratic_reply(messages: list) -> str:
+    """Generate a Socratic reply based on the user's messages.
 
-        # 2. Error handling and response validation
+    Args:
+        messages (list): List of user messages.
+
+    Raises:
+        HTTPException: If there is an error with the Gemini API.
+        HTTPException: If the response from the Gemini API is invalid.
+
+    Returns:
+        str: The Socratic reply from the Gemini API.
+    """
+
+    try:
+        # 1. Prepare the conversation history for the Gemini API        
+        #   - last message is the latest user input, and the rest are the conversation history
+        gemini_history = []
+        for msg in messages[:-1]:
+            role = "user" if msg.role == "user" else "model"
+            gemini_history.append({"role": role, "parts": [msg.content]})
+
+
+        # 2. Start a chat session with the Gemini model using the conversation history
+        chat = model.start_chat(history=gemini_history)
+
+        # 3. query the Gemini model with the latest user message
+        latest_user_message = messages[-1].content if messages else ""
+        response = await chat.send_message_async(latest_user_message)
+
         if not response.text:
-            raise HTTPException(status_code=500, detail="AI produced an empty response.")
+            raise HTTPException(status_code=500, detail="Socrates has stepped away for a moment.")
             
         return response.text
 

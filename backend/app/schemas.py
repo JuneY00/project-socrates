@@ -2,8 +2,12 @@
 
 from pydantic import BaseModel
 
+class ChatMessage(BaseModel):
+    role: str # Role of the message sender (e.g., "user" or "socrates")
+    content: str # Content of the message
+    
 class ChatRequest(BaseModel):
-    message: str # User should provide a message to the chatbot
+    messages: list[ChatMessage] # User should provide a message to the chatbot
 
 class ChatResponse(BaseModel):
     reply: str # Chatbot's reply to the user

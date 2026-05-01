@@ -17,11 +17,32 @@ app.add_middleware(
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
+    """Handle chat messages and generate responses.
+
+    Args:
+        request (ChatRequest): The chat request containing user messages.
+
+    Returns:
+        ChatResponse: The chat response containing the generated reply and tokens.
+    """
     
-    # NLP preprocessing: tokenization, lemmatization 
-    tokens = process_text(request.message)
+    # entire conversation history from the user, 
+    # which can be used for context in generating replies
+    history = request.messages
+
+    if not history:
+        return {"reply": "Hello! I'm Socrates. What would you like to discuss today?", "tokens": []}
+
     
-    # gemini api call to generate a reply based on the user's message
-    reply = await generate_socratic_reply(request.message)
+    # entire conversation history from the user, 
+    # which can be used for context in generating replies
+    history = request.messages 
     
+    if not history:
+        return {"reply": "Hello! I'm Socrates. What would you like to discuss today?", "tokens": []}
+
+    tokens = process_text(history)
+
+    reply = await generate_socratic_reply(history)
+
     return {"reply": reply, "tokens": tokens}
