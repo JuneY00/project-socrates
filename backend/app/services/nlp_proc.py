@@ -1,4 +1,3 @@
-# Natural Language Processing (NLP) Logic
 import spacy
 
 # model loading with error handling (in case the model isn't downloaded yet)
@@ -9,11 +8,35 @@ except OSError:
     os.system("python -m spacy download en_core_web_sm")
     nlp = spacy.load("en_core_web_sm")
 
-def process_text(text: str):
-    if not text.strip():
+def process_text(messages):
+    """Process user messages to extract relevant tokens.
+
+    Args:
+        messages (list): List of user messages.
+
+    Returns:
+        list: List of processed tokens.
+    """
+    
+    if not messages:
         return []
-        
-    doc = nlp(text)
-    # Tokenization, lemmatization, and removal of stop words/punctuation
-    tokens = [token.lemma_ for token in doc if not token.is_stop and not token.is_punct]
-    return tokens
+
+    # Extract the latest user message (question)
+    latest_user_message = messages[-1].content if messages else ""
+
+    if not latest_user_message.strip():
+        return []
+
+    doc = nlp(latest_user_message)
+
+    tokens = []
+    for token in doc:
+        if not token.is_stop and not token.is_punct:
+            if token.pos_ in ["NOUN", "VERB", "ADJ"]:
+                tokens.append(token.lemma_)
+
+    unique_tokens = list(set(tokens))
+    
+    # Return top 5 unique tokens for simplicity
+    return unique_tokens[:5] 
+   
