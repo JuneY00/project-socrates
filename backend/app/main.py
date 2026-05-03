@@ -26,23 +26,18 @@ async def chat(request: ChatRequest):
         ChatResponse: The chat response containing the generated reply and tokens.
     """
     
-    # entire conversation history from the user, 
-    # which can be used for context in generating replies
+    # entire conversation history from the user, which can be used for context in generating replies
     history = request.messages
 
     if not history:
         return {"reply": "Hello! I'm Socrates. What would you like to discuss today?", "tokens": []}
 
-    
-    # entire conversation history from the user, 
-    # which can be used for context in generating replies
-    history = request.messages 
-    
-    if not history:
-        return {"reply": "Hello! I'm Socrates. What would you like to discuss today?", "tokens": []}
-
     tokens = process_text(history)
 
-    reply = await generate_socratic_reply(history)
+    reply = await generate_socratic_reply(history, request.topic)
+    
+    print("=== API response ===")
+    print({"reply": reply, "tokens": tokens})  
+    print("====================")
 
     return {"reply": reply, "tokens": tokens}

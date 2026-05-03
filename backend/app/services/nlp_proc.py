@@ -27,8 +27,8 @@ def process_text(messages):
     if not latest_user_message.strip():
         return []
 
+    # Use spaCy to process the latest user message and extract relevant tokens
     doc = nlp(latest_user_message)
-
     tokens = []
     for token in doc:
         if not token.is_stop and not token.is_punct:
@@ -38,5 +38,5 @@ def process_text(messages):
     unique_tokens = list(set(tokens))
     
     # Return top 5 unique tokens for simplicity
-    return unique_tokens[:5] 
+    return unique_tokens[:10] 
    
