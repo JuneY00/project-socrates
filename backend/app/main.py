@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(title="Socrates AI")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://project-socrates-theta.vercel.app/", "http://localhost:3000"],  # frontend URLs
+    allow_origins=["https://project-socrates-theta.vercel.app", "http://localhost:3000"],  # frontend URLs
     allow_methods=["*"],
     allow_headers=["*"],
 )
