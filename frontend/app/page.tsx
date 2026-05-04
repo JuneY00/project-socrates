@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { sendChatMessage } from '@/lib/api';
 import Image from "next/image";
 
-type MessageRole = "user" | "assistant";
+type MessageRole = "user" | "model";
 
 interface ChatMessage {
   role: MessageRole;
@@ -40,20 +40,23 @@ export default function Home() {
     setInput("");
     setIsLoading(true);
 
-    const data = await sendChatMessage(newMessages, TOPICS[activeTopic].label) as { reply?: string; tokens?: string[] } | null;
-    if (data?.reply) {
+    try {
+      const data = await sendChatMessage(newMessages, TOPICS[activeTopic].label) as { reply?: string; tokens?: string[] } | null;
+      if (data?.reply) {
+        setMessages([...newMessages, {
+          role: "model",
+          content: data.reply,
+          tokens: data.tokens ?? [],
+          }]);
+      }
+    } catch (error) {
       setMessages([...newMessages, {
-        role: "assistant",
-        content: data.reply,
-        tokens: data.tokens ?? [],
+        role: "model",
+        content: `${error instanceof Error ? error.message : "An unexpected error occurred. Please try again 😢."}`,
       }]);
-    } else {
-      setMessages([...newMessages, {
-        role: "assistant",
-        content: "Socrates is taking a short break 😌. Please try again in a minute! 👋",
-      }]);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (
@@ -87,7 +90,9 @@ export default function Home() {
         {/* Header */}
         <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Image src="/little_socrates.png" alt="Socrates" width={85} height={50} style={{width: 87, height: "auto"}} />
+            <Image src="/little_socrates.png" alt="Socrates" 
+                  width={85} height={50} style={{width: "85px", height: "50px"}} 
+                  priority />
             <div>
               <div className="text-sm font-semibold">Socrates</div>
               <div className="text-xs text-green-500">Online</div>
@@ -101,7 +106,7 @@ export default function Home() {
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {messages.length === 0 && (
             <div className="text-center pt-16 text-gray-400">
-              <Image src="/little_socrates.png" alt="Socrates" className="mx-auto" width={200} height={50} style={{width: 200, height: "auto"}} />
+              <Image src="/little_socrates.png" alt="Socrates" className="mx-auto" priority width={200} height={200} style={{width: 'auto', height: "auto"}} />
               <p className="text-sm italic">"The only true wisdom is in knowing you know nothing."</p>
               <p className="text-sm mt-2">Try: <span className="text-gray-500">{TOPICS[activeTopic].example}</span></p>
             </div>
@@ -118,7 +123,7 @@ export default function Home() {
                 </div>
 
                 {/* Tokens shown below assistant reply */}
-                {msg.role === "assistant" && msg.tokens && msg.tokens.length > 0 && (
+                {msg.role === "model" && msg.tokens && msg.tokens.length > 0 && (
                   <div className="flex flex-wrap gap-1 px-1">
                     {msg.tokens.map((token, j) => (
                       <span key={j} className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">
@@ -148,7 +153,9 @@ export default function Home() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
+              placeholder="Ask Socrates a question..."
               className="flex-1 text-sm px-4 py-2.5 border border-gray-300 rounded-full outline-none focus:border-gray-400"
+
             />
             <button
               onClick={handleSend}
