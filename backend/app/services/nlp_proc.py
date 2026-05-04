@@ -36,7 +36,7 @@ def process_text(messages):
                 tokens.append(token.lemma_)
 
     unique_tokens = list(set(tokens))
-    
+
     # Return top 5 unique tokens for simplicity
-    return unique_tokens[:10] 
+    return unique_tokens[:5]
    

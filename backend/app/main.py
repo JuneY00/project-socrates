@@ -33,9 +33,8 @@ async def chat(request: ChatRequest):
         return {"reply": "Hello! I'm Socrates. What would you like to discuss today?", "tokens": []}
 
     tokens = process_text(history)
+    reply = await generate_socratic_reply(history, request.topic, tokens)
 
-    reply = await generate_socratic_reply(history, request.topic)
-    
     print("=== API response ===")
     print({"reply": reply, "tokens": tokens})  
     print("====================")

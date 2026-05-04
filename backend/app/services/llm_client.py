@@ -32,13 +32,13 @@ SYSTEM_PROMPT = (
 )
 
 # get user input and generate a Socratic reply 
-async def generate_socratic_reply(messages: list, topic: str) -> str:
+async def generate_socratic_reply(messages: list, topic: str, tokens: list) -> str:
     """Generate a Socratic reply based on the user's messages.
 
     Args:
         messages (list): List of user messages.
 
-    Raises:
+    Raises: 
         HTTPException: If there is an error with the Gemini API.
         HTTPException: If the response from the Gemini API is invalid.
 
@@ -50,6 +50,7 @@ async def generate_socratic_reply(messages: list, topic: str) -> str:
         dynamic_prompt = SYSTEM_PROMPT+(
             f"\nThe student has selected the topic: {topic}. "
             f"Focus your Socratic questions around {topic}. "
+            f"Key concepts from the student's question: {', '.join(tokens)}. " 
             "If the question is unrelated, gently guide them back to this topic."
         )
         
