@@ -7,7 +7,7 @@ Built with FastAPI, Google Gemini, spaCy, and Next.js.
 
 - **Backend**: Python, FastAPI, Google Gemini API(gemini-flash-latest), spaCy
 - **Frontend**: Next.js, Tailwind CSS, Quicksand (Google Fonts)
-- **Deployment**: Render(backend), Vercel(frontend)
+- **Deployment**: Railway(backend), Vercel(frontend)
 
 ## 2. Live Demo
 
