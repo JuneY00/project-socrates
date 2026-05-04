@@ -67,7 +67,7 @@ async def generate_socratic_reply(messages: list, topic: str, tokens: list) -> s
         #   - last message is the latest user input, and the rest are the conversation history
         gemini_history = []
         for msg in messages[:-1]:
-            role = "user" if msg.role == "user" else "assistant"
+            role = "user" if msg.role == "user" else "model"
             gemini_history.append({"role": role, "parts": [msg.content]})
 
 
@@ -82,14 +82,38 @@ async def generate_socratic_reply(messages: list, topic: str, tokens: list) -> s
         print(response.text)  
         print("======================")
         
-        if not response.text:
-            raise HTTPException(status_code=500, detail="Socrates has stepped away for a moment.")
+        # Check if response is valid
+        if not response or not response.text:
+            raise ValueError("Empty response from AI")
             
         return response.text
 
+    except ValueError as ve:
+        # Handle invalid response from Gemini API
+        print(f"Invalid response from Gemini API: {ve}")
+        raise HTTPException(
+            status_code=502,
+            detail="Received an invalid response from the Socratic Oracle. Please try again."
+        )
+        
     except Exception as e:
         # Exception handling for API errors, timeouts, etc.
-        print(f"Error calling Gemini API: {e}")
+        err_msg = str(e).lower()
+        print(f"[ERROR] Error communicating with Gemini API: {e}")
+        
+        # Rate limit or quota errors  
+        if "429" in err_msg or "quota" in err_msg:
+            raise HTTPException(
+                status_code=429,
+                detail="The Socratic Oracle is currently experiencing high demand. Please try again later."
+            )
+        # API key or permission errors
+        elif "403" in err_msg or "permission" in err_msg:
+            raise HTTPException(
+                status_code=403,
+                detail="Access to the Socratic Oracle is forbidden. Please contact support."
+            )    
+        # Other errors (network issues, server errors, etc.)
         raise HTTPException(
             status_code=503,
             detail="The Socratic Oracle is temporarily unavailable. Please try again later."
