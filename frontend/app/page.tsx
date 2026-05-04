@@ -50,7 +50,7 @@ export default function Home() {
     } else {
       setMessages([...newMessages, {
         role: "assistant",
-        content: "Something went wrong. Please try again.",
+        content: "Socrates is taking a short break 😌. Please try again in a minute! 👋",
       }]);
     }
     setIsLoading(false);
