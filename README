@@ -1,0 +1,182 @@
+# Project Socrates
+
+An AI-powered Socratic tutor that helps students aged 10–18 think critically through guided questioning. 
+Built with FastAPI, Google Gemini, spaCy, and Next.js.
+
+## 1. Tech Stack
+
+- **Backend**: Python, FastAPI, Google Gemini API(gemini-flash-latest), spaCy
+- **Frontend**: Next.js, Tailwind CSS, Quicksand (Google Fonts)
+- **Deployment**: Render(backend), Vercel(frontend)
+
+## 2. Live Demo
+
+- Little socrates : [https://project-socrates-theta.vercel.app](https://project-socrates-theta.vercel.app)
+
+## 3. Key Features
+- Socratic Method: Never gives direct answers; instead, asks one guiding question per response to encourage critical thinking.
+
+- NLP Concept Extraction: Uses spaCy to analyze user input and extract key academic concepts (nouns, verbs, adjectives).
+
+- Context Aware AI: Injects extracted tokens and the selected subject into Gemini's system prompt for more relevant guidance.
+
+- Multi language Support: Automatically detects and responds in the student’s native language.
+
+## 4. Getting Started
+
+### 4.1 Prerequisites
+
+- Python 3.12+
+- Node.js 18+
+- A [Google Gemini API key](https://aistudio.google.com/app/apikey)
+
+
+### 4.2 Backend Setup
+
+**1. Clone the repository**
+
+```bash
+git clone https://github.com/JuneY00/project-socrates.git
+cd project-socrates/backend
+```
+
+**2. Create and activate a virtual environment**
+
+```bash
+python -m venv venv
+
+source venv/bin/activate        # macOS/Linux
+
+venv\Scripts\activate           # Windows
+```
+
+**3. Install dependencies**
+
+```bash
+pip install -r requirements.txt
+```
+
+**4. Download the spaCy language model**
+
+```bash
+python -m spacy download en_core_web_sm
+```
+
+**5. Set up environment variables**
+
+Create a `.env` file in the `backend/` directory:
+
+```
+GEMINI_API_KEY=your_api_key_here
+```
+
+**6. Run the backend server**
+
+```bash
+uvicorn app.main:app --reload
+```
+
+- The API will be available at `http://localhost:8000`.
+- Swagger document will be availiable at `http://localhost:8000/docs`
+- **Production API Docs**: [https://project-socrates-production.up.railway.app/docs](https://project-socrates-production.up.railway.app/docs)
+
+
+### 4.3 Frontend Setup
+
+**1. Navigate to the frontend directory**
+
+```bash
+cd frontend
+```
+
+**2. Install dependencies**
+
+```bash
+npm install
+```
+
+**3. Set up environment variables**
+
+Create a `.env.local` file in the `frontend/` directory:
+
+```
+NEXT_PUBLIC_API_BASE=http://localhost:8000
+```
+
+**4. Run the development server**
+
+```bash
+npm run dev
+```
+
+The app will be available at `http://localhost:3000`.
+
+
+## 5. Project Structure
+
+```
+project-socrates/
+├── backend/
+│   ├── .env                  # Environment variables
+│   ├── requirements.txt
+│   └── app/
+│       ├── main.py           # FastAPI route
+│       ├── schemas.py        # Pydantic request/response models
+│       └── services/
+│           ├── llm_client.py # Gemini API integration
+│           └── nlp_proc.py   # spaCy NLP preprocessing
+└── frontend/
+    ├── app/
+    │   ├── page.tsx          # Main chat interface
+    │   ├── layout.tsx        # Root layout and metadata
+    │   └── globals.css       # Global styles and Tailwind
+    └── lib/
+        └── api.ts            # API client for backend communication
+```
+
+
+## 6. API Reference
+
+### `POST /chat`
+
+Accepts a conversation history and topic, returns a Socratic reply and extracted key concepts.
+
+**Request body:**
+```json
+{
+  "messages": [
+    { "role": "user", "content": "Why does 0! equal 1?" }
+  ],
+  "topic": "Mathematics"
+}
+```
+
+**Response:**
+```json
+{
+  "reply": "If you divide 3 factorial by 3 to get 2 factorial, what result do you get if you follow that same pattern and divide 1 factorial by 1?",
+  "tokens": [
+    "equal"
+  ]
+}
+```
+
+**Error Response (429 Too Many Requests):**
+
+```json
+{
+  "detail": "The Socratic Oracle is currently experiencing high demand. Please try again later."
+}
+```
+
+## 7. Architecture 
+![Request flow](flow.png)
+
+
+## 8. How It Works
+
+1. The user submits a question via the chat interface.
+2. The backend runs NLP preprocessing using spaCy  tokenization, stopword removal, lemmatization — to extract key concepts from the user's input.
+3. These key concepts are included in the prompt sent to the Gemini API, helping it focus its Socratic response.
+4. Gemini responds with a single guiding question in the Socratic style.
+5. The key concepts are returned to the frontend and displayed as tags below each response.
